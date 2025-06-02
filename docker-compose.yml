@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  nest-app:
+    container_name: nest-app
+    build: .
+    ports:
+      - '3000:3000'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - mysql
+    command: npm run start:dev
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: london213
+      MYSQL_DATABASE: skripsi
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
