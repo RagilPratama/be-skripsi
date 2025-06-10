@@ -5,17 +5,16 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
-    constructor(
-        @InjectRepository(User)
-        private userRepository: Repository<User>,
-    ){}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
-    findAll(): Promise<User[]>{
-        return this.userRepository.find()
-    }
+  findAll(): Promise<User[]> {
+    return this.userRepository.find();
+  }
 
-    findOne(id: number): Promise<User | null> {
-        return this.userRepository.findOneBy({ id });
-    }
-
+  findOne(id: number): Promise<User | null> {
+    return this.userRepository.findOneBy({ id });
+  }
 }

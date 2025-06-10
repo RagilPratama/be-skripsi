@@ -16,7 +16,7 @@ export class AppController {
   }
 
   @Get('/first/:id')
-    getMyFirstStringWithId(@Param('id') id?: string): string {
-  return this.appService.getMyFirstString(id);
-}
+  getMyFirstStringWithId(@Param('id') id?: string): string {
+    return this.appService.getMyFirstString(id);
+  }
 }
