@@ -9,14 +9,4 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-
-  @Get('/first')
-  getMyFirstStringNoId(): string {
-    return this.appService.getMyFirstString();
-  }
-
-  @Get('/first/:id')
-  getMyFirstStringWithId(@Param('id') id?: string): string {
-    return this.appService.getMyFirstString(id);
-  }
 }
