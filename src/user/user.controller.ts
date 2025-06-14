@@ -1,11 +1,16 @@
 import {
   Controller,
   Get,
+  Post,
+  Body,
   Param,
   ParseIntPipe,
   NotFoundException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -24,5 +29,11 @@ export class UserController {
       throw new NotFoundException(`User with id ${id} not found`);
     }
     return user;
+  }
+
+  @Post()
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    console.log('Request body:', createUserDto);
+    return this.userService.create(createUserDto);
   }
 }
