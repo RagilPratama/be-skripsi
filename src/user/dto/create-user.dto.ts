@@ -10,4 +10,8 @@ export class CreateUserDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
+
+  @ApiProperty({ description: 'Password user' })
+  @IsNotEmpty()
+  password: string;
 }

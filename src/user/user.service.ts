@@ -28,4 +28,25 @@ export class UserService {
       throw error;
     }
   }
+
+  async update(
+    id: number,
+    updateUserDto: Partial<CreateUserDto>,
+  ): Promise<User> {
+    const user = await this.userRepository.preload({
+      id: id,
+      ...updateUserDto,
+    });
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    return this.userRepository.save(user);
+  }
+
+  async delete(id: number): Promise<void> {
+    const result = await this.userRepository.delete(id);
+    if (result.affected === 0) {
+      throw new Error(`User with id ${id} not found`);
+    }
+  }
 }

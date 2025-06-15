@@ -8,6 +8,8 @@ import {
   NotFoundException,
   UsePipes,
   ValidationPipe,
+  Put,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -35,5 +37,27 @@ export class UserController {
   async createUser(@Body() createUserDto: CreateUserDto) {
     console.log('Request body:', createUserDto);
     return this.userService.create(createUserDto);
+  }
+
+  @Put(':id')
+  async updateUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: Partial<CreateUserDto>,
+  ) {
+    try {
+      return await this.userService.update(id, updateUserDto);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
+  }
+
+  @Delete(':id')
+  async deleteUser(@Param('id', ParseIntPipe) id: number) {
+    try {
+      await this.userService.delete(id);
+      return { message: `User with id ${id} deleted successfully` };
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 }
