@@ -10,7 +10,7 @@ export class CriteriaWeightService {
   constructor(
     @InjectRepository(CriteriaWeight)
     private criteriaWeightRepository: Repository<CriteriaWeight>,
-  ) {}
+  ) { }
 
   findAll(): Promise<CriteriaWeight[]> {
     return this.criteriaWeightRepository.find();
@@ -23,6 +23,21 @@ export class CriteriaWeightService {
   async create(
     createCriteriaWeightDto: CreateCriteriaWeightDto,
   ): Promise<CriteriaWeight> {
+    const totalWeight = await this.criteriaWeightRepository
+      .createQueryBuilder()
+      .select('SUM(weight)', 'sum')
+      .getRawOne();
+
+    const weight = createCriteriaWeightDto.weight;
+
+    if (weight == 0) {
+      throw new BadRequestException('Weight cannot be zero');
+    }
+    const currentSum = totalWeight?.sum ? parseFloat(totalWeight.sum) : 0;
+    if (currentSum + createCriteriaWeightDto.weight > 1) {
+      throw new BadRequestException('Total weight cannot more than 1');
+    }
+
     const criteriaWeight = this.criteriaWeightRepository.create(
       createCriteriaWeightDto,
     );
