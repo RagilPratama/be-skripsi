@@ -20,6 +20,20 @@ export class NilaiAwalService {
         private readonly criteriaWeightRepository: Repository<CriteriaWeight>,
     ) { }
 
+    async findOriginal() {
+        return this.nilaiAwalRepository.query(`
+        SELECT 
+            na.id_nilai,
+            dv.name AS nama_produk,
+            cw.criteria_name AS nama_kriteria,
+            na.nilai AS nilai
+        FROM nilai_awal na
+        INNER JOIN dimsum_variants dv ON na.id_produk = dv.id
+        INNER JOIN criteria_weight cw ON na.id_kriteria = cw.id
+        ORDER BY dv.name, cw.criteria_name
+        `);
+    }
+
     async findAll(): Promise<any[]> {
         const allNilai = await this.nilaiAwalRepository.find({ relations: ['produk', 'kriteria'] });
 

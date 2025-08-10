@@ -22,6 +22,11 @@ export class NilaiAwalController {
         return this.nilaiAwalService.findAll();
     }
 
+    @Get('original')
+    async getOriginal() {
+        return this.nilaiAwalService.findOriginal();
+    }
+
     @Get('normalisasi')
     async normalisasi() {
         return this.nilaiAwalService.normalisasiSAW();
