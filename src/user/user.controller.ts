@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   NotFoundException,
+  BadRequestException,
   UsePipes,
   ValidationPipe,
   Put,
@@ -16,7 +17,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
+
+  @Post('login')
+  async login(@Body() loginUserDto: { username: string; password: string }) {
+    try {
+      return await this.userService.login(loginUserDto);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   @Get()
   async getAllUsers() {

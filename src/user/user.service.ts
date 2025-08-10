@@ -9,7 +9,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   findAll(): Promise<User[]> {
     return this.userRepository.find();
@@ -57,5 +57,20 @@ export class UserService {
     if (result.affected === 0) {
       throw new Error(`User with id ${id} not found`);
     }
+  }
+
+  async login(loginUserDto: { username: string; password: string }): Promise<{ user: User; message: string }> {
+    const user = await this.userRepository.findOne({
+      where: { username: loginUserDto.username, password: loginUserDto.password },
+    });
+
+    if (!user) {
+      throw new Error('Invalid username or password');
+    }
+
+    return {
+      user: user,
+      message: 'success',
+    };
   }
 }
