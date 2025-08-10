@@ -22,6 +22,16 @@ export class NilaiAwalController {
         return this.nilaiAwalService.findAll();
     }
 
+    @Get('normalisasi')
+    async normalisasi() {
+        return this.nilaiAwalService.normalisasiSAW();
+    }
+
+    @Get('result-saw')
+    async resultSAW() {
+        return this.nilaiAwalService.calculateSAWResult();
+    }
+
     @Get(':id')
     async getById(@Param('id', ParseIntPipe) id: number) {
         const nilai = await this.nilaiAwalService.findOne(id);
@@ -57,4 +67,5 @@ export class NilaiAwalController {
             throw new NotFoundException(error.message);
         }
     }
+
 }

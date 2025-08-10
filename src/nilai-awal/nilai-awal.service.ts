@@ -182,4 +182,89 @@ export class NilaiAwalService {
             throw new NotFoundException(`NilaiAwal with id ${id} not found`);
         }
     }
+
+    async normalisasiSAW(): Promise<any[]> {
+        // Get all criteria weights
+        const criteriaWeights = await this.criteriaWeightRepository.find();
+
+        // Get all nilai awal grouped by produk
+        const data = await this.findAll();
+
+        // Build a map of criteria id to weight
+        const weightMap = new Map<number, number>();
+        criteriaWeights.forEach(cw => {
+            weightMap.set(cw.id, cw.weight);
+        });
+
+        // Collect all criteria keys from data
+        const criteriaKeys = new Set<string>();
+        data.forEach(item => {
+            if (item.jumlah_penjualan !== null) criteriaKeys.add('jumlah_penjualan');
+            if (item.jumlah_profit !== null) criteriaKeys.add('jumlah_profit');
+            if (item.profit_pcs !== null) criteriaKeys.add('profit_pcs');
+            Object.keys(item.other_criteria).forEach(k => criteriaKeys.add(k));
+        });
+
+        // For each criteria key, find max value across all items
+        const maxValues = new Map<string, number>();
+        criteriaKeys.forEach(key => {
+            let max = 0;
+            data.forEach(item => {
+                let val = null;
+                if (key === 'jumlah_penjualan') val = item.jumlah_penjualan;
+                else if (key === 'jumlah_profit') val = item.jumlah_profit;
+                else if (key === 'profit_pcs') val = item.profit_pcs;
+                else val = item.other_criteria[key];
+                if (val !== null && val !== undefined && val > max) {
+                    max = val;
+                }
+            });
+            maxValues.set(key, max);
+        });
+
+        // Normalize data using SAW method
+        const normalizedData = data.map(item => {
+            const normalizedItem: any = {
+                nama: item.nama_dimsum,
+            };
+            criteriaKeys.forEach(key => {
+                let val = null;
+                if (key === 'jumlah_penjualan') val = item.jumlah_penjualan !== null && item.jumlah_penjualan !== undefined ? item.jumlah_penjualan : 0;
+                else if (key === 'jumlah_profit') val = item.jumlah_profit !== null && item.jumlah_profit !== undefined ? item.jumlah_profit : 0;
+                else if (key === 'profit_pcs') val = item.profit_pcs !== null && item.profit_pcs !== undefined ? item.profit_pcs : 0;
+                else val = item.other_criteria[key] !== null && item.other_criteria[key] !== undefined ? item.other_criteria[key] : 0;
+
+                const max = maxValues.get(key) || 1;
+                const weightEntry = criteriaWeights.find(cw => {
+                    return cw.criteria_name === key || (key === 'jumlah_penjualan' && cw.id === 1) || (key === 'jumlah_profit' && cw.id === 2) || (key === 'profit_pcs' && cw.id === 3);
+                });
+                const weight = weightEntry ? weightEntry.weight : 1;
+
+                const safeVal = val ?? 0;
+                const safeMax = max || 1;
+                const normalizedVal = safeMax === 0 ? 0 : (safeVal / safeMax) * weight;
+                normalizedItem[key] = parseFloat(normalizedVal.toFixed(6));
+            });
+            return normalizedItem;
+        });
+
+        return normalizedData;
+    }
+
+    async calculateSAWResult(): Promise<any[]> {
+        const normalizedData = await this.normalisasiSAW();
+
+        // Sum normalized values to get final score
+        const criteriaKeys = Object.keys(normalizedData[0] || {}).filter(k => k !== 'nama');
+
+        const result = normalizedData.map(item => {
+            const totalScore = criteriaKeys.reduce((sum, key) => sum + (item[key] || 0), 0);
+            return {
+                nama: item.nama,
+                nilai: parseFloat(totalScore.toFixed(6)),
+            };
+        });
+
+        return result;
+    }
 }
